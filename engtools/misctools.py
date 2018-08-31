@@ -1,12 +1,32 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from cookb_signalsmooth import smooth
 import numpy as np
 import pandas as pd
 from timing import Timer
 import re
 from datetime import datetime
+
+
+# =============================================================================
+# Helper Functions
+# =============================================================================
+def smooth(x, window_len=10):
+    """
+    Adapted from: http://scipy.org/Cookbook/SignalSmooth
+    Uses 'flat' window size to return moving average
+    
+    """
+    if x.ndim != 1:
+        raise ValueError("smooth only accepts 1 dimension arrays.")
+    if x.size < window_len:
+        raise ValueError("Input vector needs to be bigger than window size.")
+    if window_len < 3:
+        return x
+    s=np.r_[2*x[0]-x[window_len:1:-1], x, 2*x[-1]-x[-1:-window_len:-1]]
+    w = np.ones(window_len,'d')
+    y = np.convolve(w/w.sum(), s, mode='same')
+    return y[window_len-1:-window_len+1]
 
 
 # =============================================================================
@@ -119,14 +139,22 @@ def df_smooth(df, win):
         i2 = gapidx[i+1]
         splits.append(df.iloc[i1:i2, :])
     # individually smooth each sub-df
+    smoothfunc = lambda x: smooth(x, window)
+    print('|'+(len(gapidx)-3)*'-'+'|')
     for j in splits:
         print('*', end='')
         if j.shape[0] > window:  # only smooth if slice is large enough
-            for i in range(len(j.dtypes)):
-                if 'float' in str(j.dtypes.values[i]).lower():
-                    # only smooth floats
-                    idx = j.dtypes.index[i]
-                    j[idx] = smooth(j[idx].values, window_len=window)
+            #TODO need to speed this step up!!
+            mask = j.dtypes==float  # only smooth floats
+            j.loc[:,mask] = j.loc[:,mask].apply(smoothfunc)
+            
+            ## old
+            # for i in range(len(j.dtypes)):
+            #     if 'float' in str(j.dtypes.values[i]).lower():
+            #         # only smooth floats
+            #         idx = j.dtypes.index[i]
+            #         j[idx] = smooth(j[idx].values, window)
+                    
     df = pd.concat(splits)
     print('')
     timeit.split('smoothing complete')
@@ -201,7 +229,10 @@ def indexconvert(df, units, start=0, chopgaps=False, gapthresh=None, dropold=Tru
         for j in splits:
             times = c * j.index.values.astype(float)/1e9  # convert
             times = times - times[0] + t0  # reset reference
-            t0 = times[-1] + (times[-1] - times[-2])  # slightly displaced to avoid duplicate indices
+            try:
+                t0 = times[-1] + (times[-1] - times[-2])  # slightly displaced to avoid duplicate indices
+            except IndexError:  # too short of slice
+                t0 = times[-1] + 0.0001
             j.reset_index(drop=dropold, inplace=True)
             j.index = times
         dfout = pd.concat(splits)
