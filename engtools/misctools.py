@@ -3,7 +3,6 @@
 
 import numpy as np
 import pandas as pd
-from timing import Timer
 import re
 from datetime import datetime
 
@@ -119,7 +118,6 @@ def df_smooth(df, win):
     pandas DataFrame containing the converted data
     
     """
-    timeit = Timer()
     diff = np.diff(df.index.values.astype(float))
     if str(df.index.dtype)=='datetime64[ns]':
         diff = diff/1e9  # s
@@ -156,8 +154,6 @@ def df_smooth(df, win):
             #         j[idx] = smooth(j[idx].values, window)
                     
     df = pd.concat(splits)
-    print('')
-    timeit.split('smoothing complete')
     return df
 
 
