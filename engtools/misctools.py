@@ -175,10 +175,10 @@ def indexconvert(df, units, start=0, chopgaps=False, gapthresh=None, dropold=Tru
     
     Optional Parameters
     -------------------
-    start : float
+    start : float or str
         t-zero value for the dataset, added to the index.
     chopgaps : bool
-        Remove missing time gaps from dataset; requires gapthresh.
+        Remove time gaps from dataset; requires gapthresh.
     gapthresh : float
         The threshold for removal of time gaps, units same as units.
     dropold : bool
@@ -190,6 +190,7 @@ def indexconvert(df, units, start=0, chopgaps=False, gapthresh=None, dropold=Tru
     
     """
     assert str(df.index.dtype)=='datetime64[ns]'
+    df = df.copy()
     df.sort_index(inplace=True)  # ensure sorted by datetime
     
     if units == 's':
@@ -201,11 +202,15 @@ def indexconvert(df, units, start=0, chopgaps=False, gapthresh=None, dropold=Tru
     elif units == 'd':
         c = 1./3600/24
     
+    if type(start)==str:
+        # timestamp
+        start = c * (df.index[0] - pd.Timestamp(start)).value/1e9
+    
     if not chopgaps:
         # just convert the index
         times = c * df.index.values.astype(float)/1e9
         df.reset_index(drop=dropold, inplace=True)
-        df.index = times - times[0]
+        df.index = (times - times[0]) + start
         return df
     
     if chopgaps:    
