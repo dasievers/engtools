@@ -10,7 +10,7 @@ from datetime import datetime
 # =============================================================================
 # Helper Functions
 # =============================================================================
-def smooth(x, window_len=10):
+def movavg(x, window_len=10):
     """
     Adapted from: http://scipy.org/Cookbook/SignalSmooth
     Uses 'flat' window size to return moving average
@@ -137,7 +137,7 @@ def df_smooth(df, win):
         i2 = gapidx[i+1]
         splits.append(df.iloc[i1:i2, :])
     # individually smooth each sub-df
-    smoothfunc = lambda x: smooth(x, window)
+    smoothfunc = lambda x: movavg(x, window)
     print('|'+(len(gapidx)-3)*'-'+'|')
     for j in splits:
         print('*', end='')
@@ -205,6 +205,8 @@ def indexconvert(df, units, start=0, chopgaps=False, gapthresh=None, dropold=Tru
     if type(start)==str:
         # timestamp
         start = c * (df.index[0] - pd.Timestamp(start)).value/1e9
+    if 'timestamp' in str(type(start)).lower():
+        start = c * (df.index[0] - start).value/1e9
     
     if not chopgaps:
         # just convert the index
