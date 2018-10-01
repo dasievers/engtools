@@ -1,6 +1,9 @@
 # project-specific ignores
 archive/
-
+bcpp IO Mapping.xlsx
+ignition_login_readonly.txt
+IOlist_updater.py
+tests/
 
 # emacs-generated folder
 auto/
