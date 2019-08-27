@@ -10,12 +10,13 @@ from datetime import datetime
 # =============================================================================
 # Helper Functions
 # =============================================================================
-def movavg(x, window_len=10):
+def movavg(xx, window_len=10):
     """
     Adapted from: http://scipy.org/Cookbook/SignalSmooth
     Uses 'flat' window size to return moving average
     
     """
+    x = np.asarray(xx)
     if x.ndim != 1:
         raise ValueError("smooth only accepts 1 dimension arrays.")
     if x.size < window_len:
@@ -97,7 +98,7 @@ def dtrange(df, start=None, end=None):
 
 
 
-def df_smooth(df, win):
+def df_smooth(dfin, win):
     """
     Smooth each series within a pd.DataFrame. If gaps in time larger than
     the window are found, the dataframe is split and separately smoothed
@@ -108,7 +109,7 @@ def df_smooth(df, win):
     
     Parameters
     ----------
-    df : pandas DataFrame
+    dfin : pandas DataFrame
         Input.
     win : float
         Window to smooth over, s for datetime64[ns].
@@ -118,6 +119,7 @@ def df_smooth(df, win):
     pandas DataFrame containing the converted data
     
     """
+    df = dfin.copy()
     diff = np.diff(df.index.values.astype(float))
     if str(df.index.dtype)=='datetime64[ns]':
         diff = diff/1e9  # s

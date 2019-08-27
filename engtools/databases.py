@@ -11,7 +11,7 @@ import glob
 import numpy as np
 import sqlite3
 from sqlalchemy import create_engine
-from datareading import batch_read
+from .datareading import batch_read
 try:
     from timing import Timer
 except ModuleNotFoundError:
