@@ -104,22 +104,32 @@ def df_smooth(dfin, win):
     the window are found, the dataframe is split and separately smoothed
     before recombining.
     
+    Can also take a Series as an input, which will yield an output series.
+    
     Index type of datetime64[ns] is automatically detected and the window units
     are in seconds; otherwise window and df index units must match.
     
     Parameters
     ----------
-    dfin : pandas DataFrame
+    dfin : pandas DataFrame (or Series)
         Input.
     win : float
         Window to smooth over, s for datetime64[ns].
+        Unit of index otherwise.
         
     Returns
     -------
-    pandas DataFrame containing the converted data
+    pandas DataFrame containing the converted data (or Series).
     
     """
     df = dfin.copy()
+    # check if df or series
+    if type(df) == type(pd.DataFrame()):
+        tp = 'df'
+    else:
+        tp = 'series'
+    df = pd.DataFrame(df)
+    
     diff = np.diff(df.index.values.astype(float))
     if str(df.index.dtype)=='datetime64[ns]':
         diff = diff/1e9  # s
@@ -156,6 +166,8 @@ def df_smooth(dfin, win):
             #         j[idx] = smooth(j[idx].values, window)
                     
     df = pd.concat(splits)
+    if tp == 'series':  # turn back into a Series
+        df = pd.Series(df.iloc[:,0])
     return df
 
 
