@@ -81,7 +81,40 @@ class SatSteam:
             return self.P - self.Patm
         else:
             return P2y_func(self.P)
+       
         
+class WaterViscosity:
+    """
+    Water viscosity lookup table versus temperature.
+        
+    Attributes
+    ----------
+        T : array or value
+            Temperature, C.
+        vd : array or value
+            Dynamic viscosity, N s/m2.
+        vk : array or value
+            Dynamic viscosity, m2/s.
+        
+    """
+    # check for viscosity table, then import
+    fpath = os.path.join(ppath, 'viscosity_water_table.txt')
+    if not os.path.isfile(fpath):
+        raise IOError('cannot find viscosity_water_table.txt')
+    visc = read_csv(fpath, sep='\t', skiprows=(0,1,3))
+    visc['Kinematic viscosity'] = visc['Kinematic viscosity'] / 1e6
+    
+    def __init__(self, T):
+        # initialize and set state (held as a pressure value, P)
+        self.T = T
+        
+        T2vd_func = interp1d(self.visc['Temperature'], 
+                    self.visc['Dynamic viscosity'], kind='cubic')
+        self.vd = T2vd_func(self.T)
+        
+        T2vk_func = interp1d(self.visc['Temperature'], 
+                    self.visc['Kinematic viscosity'], kind='cubic')
+        self.vk = T2vk_func(self.T)
 
 
 def henry_constant(T, gas):
@@ -125,6 +158,10 @@ if __name__ == '__main__':
     print(s1.to('hfg'))
     print(s2)
     print(s3.to('v'))
+    
+    v = WaterViscosity(55)
+    print(v.vk)
+    print(v.vd)
 
 
 

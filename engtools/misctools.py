@@ -77,24 +77,27 @@ def dtrange(df, start=None, end=None):
     Returns
     -------
     pandas DataFrame between start and end indices
-    stard index
+    start index
     end index
     """
     index = pd.to_datetime(df.index)
     if start is not None:
         startt = _shortdate(start, df)
-        idx_start = index.searchsorted(startt)
+#        idx_start = index.searchsorted(startt)
     else:
-        idx_start = 0
+#        idx_start = 0
         startt = index[0]
     if end is not None:
         endt = _shortdate(end, df)
-        idx_end = index.searchsorted(endt)
-        df = df.iloc[idx_start:idx_end, :]
+#        idx_end = index.searchsorted(endt)
+#        df = df.iloc[idx_start:idx_end, :]
     else:
-        df = df.iloc[idx_start:, :]
+#        df = df.iloc[idx_start:, :]
         endt = index[-1]
-    return df, startt, endt
+     
+    clip = df[(startt <= df.index) & (df.index <= endt)]
+
+    return clip, startt, endt
 
 
 
