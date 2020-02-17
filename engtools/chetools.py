@@ -97,7 +97,7 @@ class WaterViscosity:
             Dynamic viscosity, m2/s.
         
     """
-    # check for viscosity table, then import
+    # check for data table, then import
     fpath = os.path.join(ppath, 'viscosity_water_table.txt')
     if not os.path.isfile(fpath):
         raise IOError('cannot find viscosity_water_table.txt')
@@ -105,7 +105,7 @@ class WaterViscosity:
     visc['Kinematic viscosity'] = visc['Kinematic viscosity'] / 1e6
     
     def __init__(self, T):
-        # initialize and set state (held as a pressure value, P)
+        # initialize and set state
         self.T = T
         
         T2vd_func = interp1d(self.visc['Temperature'], 
@@ -116,6 +116,33 @@ class WaterViscosity:
                     self.visc['Kinematic viscosity'], kind='cubic')
         self.vk = T2vk_func(self.T)
 
+
+class WaterDensity:
+    """
+    Water density lookup table versus temperature.
+        
+    Attributes
+    ----------
+        T : array or value
+            Temperature, C.
+        p : array or value
+            Density, g/cm3.
+        
+    """
+    # check for data table, then import
+    fpath = os.path.join(ppath, 'density_water_table.txt')
+    if not os.path.isfile(fpath):
+        raise IOError('cannot find density_water_table.txt')
+    dens = read_csv(fpath, sep='\t', skiprows=(0,1,3))
+    
+    def __init__(self, T):
+        # initialize and set state
+        self.T = T
+        
+        T2r_func = interp1d(self.dens['Temperature'], 
+                    self.dens['Density'], kind='cubic')
+        self.r = T2r_func(self.T)
+        
 
 def henry_constant(T, gas):
     """
@@ -162,6 +189,9 @@ if __name__ == '__main__':
     v = WaterViscosity(55)
     print(v.vk)
     print(v.vd)
+    
+    r = WaterDensity(25)
+    print(r.r)
 
 
 
