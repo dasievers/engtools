@@ -56,7 +56,7 @@ def _shortdate(s, df):
                                                pd.to_datetime(s).time()))
     
 
-def dtrange(df, start=None, end=None):
+def dtrange(df, start=None, end=None, returnstartend=False):
     """
     Return a dataframe between the two given date/times, even if there is no
     exact match within the df index.
@@ -72,13 +72,15 @@ def dtrange(df, start=None, end=None):
         Date-time in a format that can be automatically parsed by pandas.
     end : str
         Date-time in a format that can be automatically parsed by pandas.    
+    returnstartend : bool
+        Return the start and end indices as well.
 
 
     Returns
     -------
     pandas DataFrame between start and end indices
-    start index
-    end index
+    start index (optional)
+    end index (optional)
     """
     index = pd.to_datetime(df.index)
     if start is not None:
@@ -96,8 +98,11 @@ def dtrange(df, start=None, end=None):
         endt = index[-1]
      
     clip = df[(startt <= df.index) & (df.index <= endt)]
-
-    return clip, startt, endt
+    
+    if returnstartend:
+        return clip, startt, endt
+    else:
+        return clip
 
 
 
@@ -264,7 +269,7 @@ def indexconvert(df, units, start=0, chopgaps=False, gapthresh=None, dropold=Tru
 #==============================================================================
 
 def local_minima(x, mode='simple', r=100, c=None):
-    '''
+    """
     Find local minima in an array and return indices.
     
     Parameters
@@ -285,7 +290,7 @@ def local_minima(x, mode='simple', r=100, c=None):
     Returns
     -------
     Array with local minima indices of original array, sorted.    
-    '''
+    """
     # calculate initial guesses by simple differentiation, using gradient to return equal size array 
     g = np.nonzero(np.concatenate((np.diff(np.sign(np.gradient(x)))>0, [False])))[0]
     result = []
@@ -323,7 +328,7 @@ def local_minima(x, mode='simple', r=100, c=None):
     
 
 def local_maxima(x, mode='simple', r=100, c=None):
-    '''
+    """
     Find local maxima in an array and return indices.
     
     Parameters
@@ -344,7 +349,7 @@ def local_maxima(x, mode='simple', r=100, c=None):
     Returns
     -------
     Array with local minima indices of original array, sorted.    
-    '''
+    """
     # calculate initial guesses by simple differentiation, using gradient to return equal size array
     g = np.nonzero(np.concatenate((np.diff(np.sign(np.gradient(x)))<0, [False])))[0]
     result = []
@@ -401,7 +406,7 @@ def local_maxima(x, mode='simple', r=100, c=None):
 
 
 def polyfit2d(x, y, f, deg, mask=None):
-    '''
+    """
     Given coordinates and values, fit a polynomial and return parameters.
     
     Parameters
@@ -418,7 +423,7 @@ def polyfit2d(x, y, f, deg, mask=None):
     Returns
     -------
     2D array with polynomial factors.
-    '''
+    """
     from numpy.polynomial import polynomial
     import numpy as np
     x = np.asarray(x)
@@ -452,7 +457,7 @@ def polyfit2d(x, y, f, deg, mask=None):
     
     
 def polyfit3d(x, y, z, f, deg, mask=None):
-    '''
+    """
     Given coordinates and values, fit a polynomial and return parameters.
     
     Parameters
@@ -470,7 +475,7 @@ def polyfit3d(x, y, z, f, deg, mask=None):
     Returns
     -------
     3D array with polynomial factors.
-    '''
+    """
     from numpy.polynomial import polynomial
     import numpy as np
     x = np.asarray(x)
