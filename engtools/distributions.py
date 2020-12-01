@@ -315,7 +315,7 @@ if __name__ == '__main__':
              
 
     # 2009 RTD test             
-    rtd= RTD(t=tor, s=sor)
+    rtd = RTD(t=tor, s=sor)
     rtd.calc_params()
     print(rtd.mean, rtd.var, rtd.skew, rtd.kurt, rtd.scale)
     das.RTDcalc(tor, sor)[:5]         

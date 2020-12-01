@@ -8,13 +8,13 @@ from scipy.interpolate import interp1d
 
 ppath = os.path.split(__file__)[0]
 
-Patm_NREL = 24.02/29.92*101.325  # kPa, atmospheric, average of NREL's SRRL weather station
+Patm_NREL = 24.02/29.92*101.325  # kPa, atmospheric
 
 class SatSteam:
     """
     A saturated steam state. Initialized by a corresponding pressure,
     temperature, etc. State is internally stored as an absolute
-    pressure in kPa. Default Patm reference is at NREL's STM site.
+    pressure in kPa. Default Patm reference is Denver.
     
     Valid parameters are as follows
     
