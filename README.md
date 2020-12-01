@@ -1,5 +1,8 @@
 # engtools
-A collection of engineering and database tools that include methods to calculate bioenergy primary conversion reactor yields.
+A collection of engineering, database, and miscellaneous dataframe tools that include methods to calculate bioenergy primary conversion reactor yields.
+
+## Pandas Dataframe and Miscellaneous
+Miscellaneous conversion tools are available that do things like converting date-time indices to elapsed time, clipping a dataframe with date-time bookends, smoothing. Also available is a simple timing function to evaluate code snippets.
 
 ## Chemical Engineering Tools
 ### SatSteam
