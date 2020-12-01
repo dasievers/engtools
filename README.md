@@ -1,13 +1,20 @@
 # engtools
 A collection of engineering and database tools that include methods to calculate bioenergy primary conversion reactor yields.
 
+## Chemical Engineering Tools
+### SatSteam
+A saturated steam state object that is used to deliver corresponsing temperature, pressure, enthalpy, etc.
+
+### WaterViscosity
+Viscosity of water at given temperature.
+
+### WaterDensity
+Density of water at given temperature.
+
+### henry_constant
+Calculate Henry constant for a given gas and temperature.
+
 ## Database Tools
-### ignition_query
-This function was built for the Induction Automation *Ignition* SCADA. Data is stored in a Microsoft SQL database and this function makes queries for specific date ranges and for specific instrument tags. Additional query language can be passed to filter results.
-
-### IgnitionTags
-A class that fetches the list of instrument tags in the Ignition database. Useful for determining what tags are available to be queried by ignition_query().
-
 ### dbupdate_sqlite
 This function is built with some presets for convenience, but it really provides a general process for creating and updating local sqlite databases from a growing directory of text files (.csv, .tsv) from automated data loggers, such as OptoDisplay. Instead of the time-consuming process of reading in all files and then filtering the results to a specific query, a database can be maintained and queried as needed much more efficiently.
 
