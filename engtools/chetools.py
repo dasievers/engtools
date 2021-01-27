@@ -10,6 +10,36 @@ ppath = os.path.split(__file__)[0]
 
 Patm_NREL = 24.02/29.92*101.325  # kPa, atmospheric
 
+# =============================================================================
+# 
+# =============================================================================
+
+def adiabatic_process(x0, x1, xtype, y0, ytype, k=1.4):
+    """
+    Adiabatic process
+    
+    Inputs parameter type (xtype) and initial/final states (x0, x1).
+    Outputs final output state (y1) for type (ytype) given initial state (y0).
+    
+    Source: ISBN 0-07-238332-1 p328
+    """
+    if xtype=='T':
+        change = x1/x0
+    elif xtype=='P':
+        change = (x1/x0)**((k-1)/k)
+    elif xtype=='v':
+        change = (x0/x1)**(k-1)
+    
+    if ytype=='T':
+        y1 = y0 * change
+    elif ytype=='P':
+        y1 = y0 * change**(1/((k-1)/k))
+    elif ytype=='v':
+        y1 = y0 / change**(1/(k-1))
+        
+    return y1
+
+
 class SatSteam:
     """
     A saturated steam state. Initialized by a corresponding pressure,
