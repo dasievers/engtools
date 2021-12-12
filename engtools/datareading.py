@@ -20,8 +20,8 @@ import os
 # Loading Data
 # =============================================================================
 
-def read_data(datapath, datetimecols=[0], tz=None, selectcols=None, dropcols=None, 
-                depricated_names={},  overwrite_nulls=False, calcs=None):
+def read_data(datapath, datetimecols=[0], tz=None, selectcols=None, dropcols=None,
+                deprecated_names={},  overwrite_nulls=False, calcs=None):
 
     if '.xls' in datapath:
         importdf = pd.read_excel(datapath, parse_dates=datetimecols, index_col=0)
@@ -42,15 +42,15 @@ def read_data(datapath, datetimecols=[0], tz=None, selectcols=None, dropcols=Non
             delimiter = ','
         else:
             delimiter = None  # error
-        importdf = pd.read_csv(StringIO(s), delimiter=delimiter, 
+        importdf = pd.read_csv(StringIO(s), delimiter=delimiter,
                                parse_dates=datetimecols, index_col=0)
-    
+
     if tz is not None:
         # set the time zone
         importdf.index = importdf.index.tz_localize(tz)
-    
+
     # rename and drop columns as specified
-    importdf.rename(columns=depricated_names, inplace=True)
+    importdf.rename(columns=deprecated_names, inplace=True)
     if selectcols is not None:
         dropcols = set(importdf.columns.values) - selectcols
     if dropcols is not None:
@@ -72,14 +72,14 @@ def batch_read(datapath_list, **kwargs):
         print(os.path.split(datapath)[1])
         importdf = read_data(datapath, **kwargs)
         datalist.append(importdf)
-        
+
     masterdata = pd.concat(datalist, sort=True)
     masterdata.sort_index(inplace=True)
-        
-    
+
+
     if any(masterdata.index.duplicated()):  # need to collapse duplicate rows
         masterdata = masterdata.pivot_table(index=masterdata.index, dropna=False)  # this seems to work
-    
+
     timeit.split('elapsed for import')
     return masterdata
 

@@ -1,4 +1,4 @@
-"water density (0-100¡C at 1 atm, >100 ¡C at saturation pressure)"	
+"water density (0-100C at 1 atm, >100C at saturation pressure)"	
 https://www.engineeringtoolbox.com/water-density-specific-weight-d_595.html	
 Temperature	Density
 (C)	(g/cm3)
