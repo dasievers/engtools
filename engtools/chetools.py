@@ -48,9 +48,9 @@ class SatSteam:
 
     Valid parameters are as follows
 
-    ====== ==================================
+    ====== =====================================
     param   unit
-    ====== ==================================
+    ====== =====================================
     P       (kPa)
     Pg      (kPa gauge)
     psig    (psi gauge), for convenience
@@ -61,7 +61,7 @@ class SatSteam:
     hg      (kJ/kg)
     hfg     (kJ/kg)
     s       (kJ/kg-K)
-    ====== ==================================
+    ====== =====================================
 
     Attributes
     ----------
@@ -75,10 +75,11 @@ class SatSteam:
             by `param`.
     """
     # check for steam table, then import
-    fpath = os.path.join(ppath, 'steam_table_sat.txt')
+    fname = 'steam_table_sat.csv'
+    fpath = os.path.join(ppath, fname)
     if not os.path.isfile(fpath):
-        raise IOError('cannot find steam_table_sat.txt')
-    steam = read_csv(fpath, sep='\t', skiprows=(0,1,3))
+        raise IOError(f'cannot find {fname}')
+    steam = read_csv(fpath, skiprows=(0,1,3))
 
     def __init__(self, value, parameter, Patm=Patm_NREL):
         # initialize and set state (held as a pressure value, P)
@@ -113,68 +114,73 @@ class SatSteam:
             return P2y_func(self.P)
 
 
-class WaterViscosity:
+class Water:
     """
-    Water viscosity lookup table versus temperature.
+    Water density and viscosity lookup object. Set temperature and read
+    results as attributes.
 
     Attributes
     ----------
         T : array or value
             Temperature, C.
 
+        rho : array or value
+            Density, g/cm3.
+
         vd : array or value
-            Dynamic viscosity, N s/m2.
+            Dynamic viscosity, N-s/m2.
 
         vk : array or value
             Dynamic viscosity, m2/s.
-
     """
+    ### density conversions
     # check for data table, then import
-    fpath = os.path.join(ppath, 'viscosity_water_table.txt')
+    fname = 'density_water_table.csv'
+    fpath = os.path.join(ppath, fname)
     if not os.path.isfile(fpath):
-        raise IOError('cannot find viscosity_water_table.txt')
-    visc = read_csv(fpath, sep='\t', skiprows=(0,1,3))
+        raise IOError(f'cannot find {fname}')
+    dens = read_csv(fpath, skiprows=(0,1,3))
+
+    T2rho_func = interp1d(dens['Temperature'],
+                dens['Density'], kind='cubic')
+
+
+    ### viscosity conversions
+    # check for data table, then import
+    fname = 'viscosity_water_table.csv'
+    fpath = os.path.join(ppath, fname)
+    if not os.path.isfile(fpath):
+        raise IOError(f'cannot find {fname}')
+    visc = read_csv(fpath, skiprows=(0,1,3))
     visc['Kinematic viscosity'] = visc['Kinematic viscosity'] / 1e6
 
-    def __init__(self, T):
-        # initialize and set state
-        self.T = T
-
-        T2vd_func = interp1d(self.visc['Temperature'],
-                    self.visc['Dynamic viscosity'], kind='cubic')
-        self.vd = T2vd_func(self.T)
-
-        T2vk_func = interp1d(self.visc['Temperature'],
-                    self.visc['Kinematic viscosity'], kind='cubic')
-        self.vk = T2vk_func(self.T)
+    T2vd_func = interp1d(visc['Temperature'],
+                visc['Dynamic viscosity'], kind='cubic')
+    T2vk_func = interp1d(visc['Temperature'],
+                visc['Kinematic viscosity'], kind='cubic')
 
 
-class WaterDensity:
-    """
-    Water density lookup table versus temperature.
+    # update dynamic properties
+    @property
+    def T(self):
+        return self._T
+    @T.setter
+    def T(self, T):
+        self._T = T
+        self.update()
 
-    Attributes
-    ----------
-        T : array or value
-            Temperature, C.
-
-        p : array or value
-            Density, g/cm3.
-
-    """
-    # check for data table, then import
-    fpath = os.path.join(ppath, 'density_water_table.txt')
-    if not os.path.isfile(fpath):
-        raise IOError('cannot find density_water_table.txt')
-    dens = read_csv(fpath, sep='\t', skiprows=(0,1,3))
 
     def __init__(self, T):
-        # initialize and set state
         self.T = T
 
-        T2r_func = interp1d(self.dens['Temperature'],
-                    self.dens['Density'], kind='cubic')
-        self.r = T2r_func(self.T)
+
+    def update(self):
+        self.rho = self.T2rho_func(self.T)
+
+        self.vd = self.T2vd_func(self.T)
+        self.vk = self.T2vk_func(self.T)
+
+
 
 
 def henry_constant(T, gas):
@@ -184,27 +190,38 @@ def henry_constant(T, gas):
     Parameters
     ----------
     T : float, (C)
-        Temperature
+        Temperature.
 
     gas : str
         Name of gas.
 
-        =======================
+        =============================
         available gases
-        =======================
+        =============================
         oxygen
-        =======================
+        nitrogen
+        hydrogen
+        carbon dioxide
+        hydrogen sulfide
+        ozone
+        ammonia
+        methane
+        =============================
 
     Returns
     -------
     Henry constant in (mM/atm)
     """
     # data from http://www.mpch-mainz.mpg.de/~sander/res/henry.html
-    #TODO add all the gases out of the reference by using an external data table
+    fpath = os.path.join(ppath, 'henry_coefficients.csv')
+    cfs = read_csv(fpath, skiprows=3)
+    cfs.set_index('substance', drop=True, inplace=True)
+    # kHstd in M/atm
+    # ddt in K
+
     T = float(T + 273)
-    kHstd = {'oxygen':1.3}  # mM/atm
-    ddt = {'oxygen':1500}  # K
-    return kHstd[gas] * exp(ddt[gas] * (1/T - 1/298.))  # mM/atm
+    kH = cfs.loc[gas, 'kHstd'] * exp(cfs.loc[gas, 'ddt'] * (1/T - 1/298.))  # M/atm
+    return kH * 1e3  # mM/atm
 
 
 
@@ -220,12 +237,12 @@ if __name__ == '__main__':
     print(s2)
     print(s3.to('v'))
 
-    v = WaterViscosity(55)
-    print(v.vk)
-    print(v.vd)
+    w = Water(55)
+    print(w.vk)
+    print(w.vd)
+    print(w.rho)
 
-    r = WaterDensity(25)
-    print(r.r)
+    print(henry_constant(60, 'hydrogen'))
 
 
 

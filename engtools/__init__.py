@@ -1,6 +1,7 @@
 import importlib
 
 from .chetools import *
+from .hydrogen import *
 from .miscellaneous import *
 from .datareading import *
 from .processcalcs import *

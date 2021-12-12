@@ -1,28 +1,46 @@
-# engtools
+# EngTools
 
 A collection of engineering, database, and miscellaneous dataframe tools that include methods to calculate bioenergy primary conversion reactor yields.
 
-## Pandas Dataframe and Miscellaneous
+## Installation
+
+Use the following to install.
+
+    pip install git+https://github.com/dasievers/engtools
+
+## General Data Tools
 
 Miscellaneous conversion tools are available that do things like converting date-time indices to elapsed time, clipping a dataframe with date-time bookends, smoothing. Also available is a simple timing function to evaluate code snippets.
 
+### dtrange
+
+A function that takes a Pandas dataframe or series and returns only the portion of interest, specified by start/end date-times.
+
+### df_smooth
+
+A function that takes a Pandas dataframe or series and returns a smoothed version of the data based on user parameters. Smoothing is done using a moving window convolution, similar to a moving average.
+
+### indexconvert
+
+A function that takes a Pandas dataframe or series and returns a version with index converted from datetime64[ns] to float values. Useful for converting to e.g. runtime instead of absolute datetime. Various options are available including removing large gaps in time.
+
 ## Chemical Engineering Tools
 
-### SatSteam
+### SatSteam & Water
 
-A saturated steam state object that is used to deliver corresponsing temperature, pressure, enthalpy, etc.
-
-### WaterViscosity
-
-Viscosity of water at given temperature.
-
-### WaterDensity
-
-Density of water at given temperature.
+Classes that enable looking up saturated steam properties and also density and viscosity of liquid water.
 
 ### henry_constant
 
 Calculate Henry constant for a given gas and temperature.
+
+### Hydrogen
+
+A class that calculates the Z-factor of hydrogen gas given temperature and pressure.
+
+### adiabatic_process
+
+Function that models an adiabatic process of an ideal gas.
 
 ## Database Tools
 
