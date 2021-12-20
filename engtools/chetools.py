@@ -23,6 +23,7 @@ def adiabatic_process(x0, x1, xtype, y0, ytype, k=1.4):
 
     Source: ISBN 0-07-238332-1 p328
     """
+
     if xtype=='T':
         change = x1/x0
     elif xtype=='P':
@@ -74,6 +75,7 @@ class SatSteam:
             returns the state of the steam in value units specified
             by `param`.
     """
+
     # check for steam table, then import
     fname = 'steam_table_sat.csv'
     fpath = os.path.join(ppath, fname)
@@ -133,6 +135,7 @@ class Water:
         vk : array or value
             Dynamic viscosity, m2/s.
     """
+
     ### density conversions
     # check for data table, then import
     fname = 'density_water_table.csv'
@@ -212,6 +215,7 @@ def henry_constant(T, gas):
     -------
     Henry constant in (mM/atm)
     """
+
     # data from http://www.mpch-mainz.mpg.de/~sander/res/henry.html
     fpath = os.path.join(ppath, 'henry_coefficients.csv')
     cfs = read_csv(fpath, skiprows=3)

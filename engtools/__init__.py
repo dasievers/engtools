@@ -6,6 +6,7 @@ from .miscellaneous import *
 from .datareading import *
 from .processcalcs import *
 from .distributions import *
+from .rtd_measurement import *
 
 if (importlib.util.find_spec('sqlalchemy') and importlib.util.find_spec('sqlite3')):
     from .databases import *
