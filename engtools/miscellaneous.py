@@ -37,6 +37,36 @@ def movavg(xx, window_len=10):
     return y[window_len-1:-window_len+1]
 
 
+def movavg_historical(xx, window_len=10):
+    """
+    A moving average similar to 'movavg', but only looking
+    backwards. The first number of rows up to window_len
+    will be only the average of the data up to that point.
+    This will output the same shape 1D array.
+    """
+
+    x = np.asarray(xx)
+    if x.ndim != 1:
+        raise ValueError("smooth only accepts 1 dimension arrays.")
+    if x.size < window_len:
+        raise ValueError("Input vector needs to be bigger than window size.")
+
+    # beginning section up to window_len
+    yb = np.array([])
+    for i in range(window_len):
+        iavg = np.mean(x[:i+1])
+        yb = np.append(yb, iavg)
+
+    # bulk of array (separate to speed up without for-loop)
+    # idea of backwards-looking is from https://www.statology.org/moving-average-python/
+    # the first part is cut out since it's only nans within the window_len
+    ye = pd.Series(x).rolling(window=window_len).mean().iloc[window_len:].values
+
+    #combine back together
+    y = np.concatenate([yb, ye])
+    return y
+
+
 def unitX(x, u0, u):
     """
     Convert units.
@@ -155,7 +185,7 @@ def dtrange(df, start=None, end=None, returnstartend=False):
 
 
 
-def df_smooth(dfin, win):
+def df_smooth(dfin, win, style='centered'):
     """
     Smooth each series within a pd.DataFrame. If gaps in time larger than
     the window are found, the dataframe is split and separately smoothed
@@ -173,6 +203,16 @@ def df_smooth(dfin, win):
     win : float
         Window to smooth over, s for datetime64[ns].
         Unit of index otherwise.
+
+    Optional Parameters
+    -------------------
+    style : str
+        The type of average to give. If 'centered', the np.convolve
+        function will be used and each returned value will be averaged
+        around the center of that point. If 'historical', then
+        the mean averages for each point will only be looking
+        backwards; in this case, the first values within the length
+        of 'win' will be only averaged to the beginning of the array.
 
     Returns
     -------
@@ -206,7 +246,10 @@ def df_smooth(dfin, win):
         i2 = gapidx[i+1]
         splits.append(df.iloc[i1:i2, :])
     # individually smooth each sub-df
-    smoothfunc = lambda x: movavg(x, window)
+    if style=='centered':
+        smoothfunc = lambda x: movavg(x, window)
+    elif style=='historical':
+        smoothfunc = lambda x: movavg_historical(x, window)
     print('|'+(len(gapidx)-3)*'-'+'|')
     for j in splits:
         print('*', end='')
@@ -682,6 +725,9 @@ def polyfit3d(x, y, z, f, deg, mask=None):
     else:
         cc = c
     return cc.reshape(deg+1)
+
+
+
 
 
 
